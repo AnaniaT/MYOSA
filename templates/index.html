@@ -302,7 +302,7 @@
   }
 </style>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
@@ -437,7 +437,7 @@
         </div>
       </div>
       <div class="thermal-panel">
-        <img class="thermal-image" src="floorplan.png" alt="Home thermal floor plan" />
+        <img class="thermal-image" src="{{ url_for('static', filename='floorplan.png') }}" alt="Home thermal floor plan" />
         <div class="thermal-overlay" id="thermal-overlay">
           <div class="thermal-room" data-room="Living" data-heat="22" data-light="320" data-origin="0% 0%" data-angle="0" style="left:2.5%; top:7%; width:24%; height:88%;"></div>
           <div class="thermal-room" data-room="Kitchen" data-heat="26" data-light="420" data-origin="70% 85%" data-angle="0" style="left:27.5%; top:7%; width:23.5%; height:70%;"></div>
@@ -645,7 +645,7 @@
     updateData();
   </script>
 
-  <script src="script.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
   
 </body>
 </html>
