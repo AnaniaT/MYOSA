@@ -300,6 +300,8 @@
     }
   }
 </style>
+
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -423,6 +425,31 @@
 
     </section>
 
+    <section class="thermal-overview">
+      <div class="thermal-header">
+        <div class="thermal-title">HOME THERMAL OVERVIEW</div>
+        <div class="thermal-legend">
+          <span class="legend-item" style="color:#22e6a7;"><span class="legend-dot"></span>Cool</span>
+          <span class="legend-item" style="color:#4d9dff;"><span class="legend-dot"></span>Stable</span>
+          <span class="legend-item" style="color:#ff8b3d;"><span class="legend-dot"></span>Warm</span>
+          <span class="legend-item" style="color:#ff4d6d;"><span class="legend-dot"></span>Hot</span>
+        </div>
+      </div>
+      <div class="thermal-panel">
+        <img class="thermal-image" src="floorplan.png" alt="Home thermal floor plan" />
+        <div class="thermal-overlay" id="thermal-overlay">
+          <div class="thermal-room" data-room="Living" data-heat="22" data-origin="0% 0%" data-angle="0" style="left:2.5%; top:7%; width:24%; height:88%;"></div>
+          <div class="thermal-room" data-room="Kitchen" data-heat="26" data-origin="70% 85%" data-angle="0" style="left:27.5%; top:7%; width:23.5%; height:70%;"></div>
+          <div class="thermal-room" data-room="Bedroom 2" data-heat="24" data-origin="20% 60%" data-angle="0" style="left:52%; top:7%; width:13%; height:70%;"></div>
+          <div class="thermal-room" data-room="Bath" data-heat="20" data-origin="45% 30%" data-angle="0" style="left:65.5%; top:7%; width:8.5%; height:70%;"></div>
+          <div class="thermal-room" data-room="Bedroom 1" data-heat="24" data-origin="55% 65%" data-angle="0" style="left:74.5%; top:7%; width:23%; height:88%;"></div>
+          <div class="thermal-room" data-room="Hall" data-heat="23" data-origin="50% -100%" data-angle="0" style="left:26.5%; top:77.5%; width:47.5%; height:18%;"></div>
+        </div>
+      </div>
+    </section>
+
+    
+
     <div class="footer">
       <div>● System Status: <span class="green" id="system-status">Waiting for sensor</span></div>
       <div>Last Updated: <span id="last-updated">--</span></div>
@@ -469,6 +496,103 @@
         document.getElementById("system-status").textContent = "Waiting for sensor";
       }
     }
+
+    const heatmapConfig = {
+      min: 18,
+      max: 30,
+      colors: {
+        cool: "#22e6a7",
+        stable: "#4d9dff",
+        warm: "#ff8b3d",
+        hot: "#ff4d6d"
+      }
+    };
+
+    function lerpColor(a, b, t) {
+      const ah = parseInt(a.slice(1), 16);
+      const ar = (ah >> 16) & 0xff;
+      const ag = (ah >> 8) & 0xff;
+      const ab = ah & 0xff;
+      const bh = parseInt(b.slice(1), 16);
+      const br = (bh >> 16) & 0xff;
+      const bg = (bh >> 8) & 0xff;
+      const bb = bh & 0xff;
+      const rr = Math.round(ar + (br - ar) * t);
+      const rg = Math.round(ag + (bg - ag) * t);
+      const rb = Math.round(ab + (bb - ab) * t);
+      return `rgb(${rr}, ${rg}, ${rb})`;
+    }
+
+    function heatToColor(value) {
+      const { min, max, colors } = heatmapConfig;
+      const clamped = Math.min(Math.max(value, min), max);
+      const normalized = (clamped - min) / (max - min);
+      if (normalized <= 0.33) {
+        return lerpColor(colors.cool, colors.stable, normalized / 0.33);
+      }
+      if (normalized <= 0.66) {
+        return lerpColor(colors.stable, colors.warm, (normalized - 0.33) / 0.33);
+      }
+      return lerpColor(colors.warm, colors.hot, (normalized - 0.66) / 0.34);
+    }
+
+    function buildHeatStops(colorRamp) {
+      return `${colorRamp[0]} 0%, ${colorRamp[1]} 35%, ${colorRamp[2]} 60%, ${colorRamp[3]} 85%, rgba(0,0,0,0) 100%`;
+    }
+
+    function getRoomKey(room) {
+      return room.getAttribute("data-room").toLowerCase();
+    }
+
+    function getDefaultOrigin(room) {
+      return room.getAttribute("data-origin") || "50% 50%";
+    }
+
+    function getDefaultAngle(room) {
+      return room.getAttribute("data-angle") || "0";
+    }
+
+    function setHeatmapData(roomData) {
+      const rooms = document.querySelectorAll(".thermal-room");
+      rooms.forEach((room) => {
+        const key = getRoomKey(room);
+        const entry = roomData[key];
+        const tempValue = typeof entry === "number"
+          ? entry
+          : Number(entry?.value ?? room.getAttribute("data-heat"));
+        const origin = entry?.origin ?? getDefaultOrigin(room);
+        const angle = entry?.angle ?? getDefaultAngle(room);
+        const colorRamp = entry?.colors ?? [
+          heatmapConfig.colors.cool,
+          heatmapConfig.colors.stable,
+          heatmapConfig.colors.warm,
+          heatmapConfig.colors.hot
+        ];
+        const color = heatToColor(tempValue);
+        room.style.setProperty("--heat-origin", origin);
+        room.style.setProperty("--heat-angle", `${angle}deg`); // Not used atp
+        room.style.setProperty("--heat-stops", buildHeatStops(colorRamp));
+        room.style.setProperty("--heat-glow", color);
+      });
+    }
+
+    // MODIFY TO ACTUALLY REFLECT SENSED HEATMAP
+    async function refreshHeatmap() {
+      try {
+        const response = await fetch("/heatmap");
+        if (!response.ok) return;
+        const data = await response.json();
+        if (data && data.rooms) {
+          setHeatmapData(data.rooms);
+        }
+      } catch (error) {
+        return;
+      }
+    }
+
+    window.setHeatmapData = setHeatmapData;
+    setHeatmapData({});
+    setInterval(refreshHeatmap, 3000);
 
     setInterval(updateData, 1000);
     updateData();

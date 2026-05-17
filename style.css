@@ -1,0 +1,114 @@
+.thermal-overview {
+  margin-top: 40px;
+  padding: 26px 28px 30px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(
+    145deg,
+    rgba(8, 18, 33, 0.96),
+    rgba(5, 12, 24, 0.98)
+  );
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.35);
+}
+
+.thermal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.thermal-title {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  color: #e7f1ff;
+}
+
+.thermal-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  letter-spacing: 1.2px;
+  color: #9fb8d6;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.thermal-panel {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(2, 10, 20, 0.7);
+}
+
+.thermal-image {
+  width: 100%;
+  display: block;
+  object-fit: contain;
+  min-height: 260px;
+}
+
+.thermal-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.thermal-room {
+  position: absolute;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 30px var(--heat-glow, rgba(0, 0, 0, 0.35));
+  opacity: 0.85;
+  mix-blend-mode: screen;
+  overflow: hidden;
+}
+
+.thermal-room::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--heat-origin, 50% 50%),
+    var(--heat-stops)
+  );
+  transform: rotate(var(--heat-angle, 0deg));
+  transform-origin: var(--heat-origin, 50% 50%);
+}
+
+.thermal-room::after {
+  content: attr(data-room);
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  font-size: 12px;
+  letter-spacing: 2px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.92);
+  text-transform: uppercase;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.65);
+}
+
+@media (max-width: 760px) {
+  .thermal-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
