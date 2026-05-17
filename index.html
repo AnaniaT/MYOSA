@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>MAKEBots Sensor Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   * {
     box-sizing: border-box;
@@ -449,6 +450,46 @@
     </section>
 
     
+    <section class="analytics-section">
+      <div class="analytics-header">
+        <div class="analytics-title">ENVIRONMENTAL TRENDS</div>
+        <div class="analytics-subtitle">Interactive timeframes</div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">Humidity</div>
+            <div class="chart-controls" data-target="humidity">
+              <button class="chart-btn active" data-range="daily">Daily</button>
+              <button class="chart-btn" data-range="weekly">Weekly</button>
+            </div>
+            <div class="chart-nav" data-target="humidity">
+              <button class="nav-btn" data-dir="prev" aria-label="Previous">&lt;</button>
+              <span class="nav-label" data-label>Today</span>
+              <button class="nav-btn" data-dir="next" aria-label="Next">&gt;</button>
+            </div>
+          </div>
+          <canvas id="humidity-chart" height="220"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">Pressure</div>
+            <div class="chart-controls" data-target="pressure">
+              <button class="chart-btn active" data-range="daily">Daily</button>
+              <button class="chart-btn" data-range="weekly">Weekly</button>
+            </div>
+            <div class="chart-nav" data-target="pressure">
+              <button class="nav-btn" data-dir="prev" aria-label="Previous">&lt;</button>
+              <span class="nav-label" data-label>Today</span>
+              <button class="nav-btn" data-dir="next" aria-label="Next">&gt;</button>
+            </div>
+          </div>
+          <canvas id="pressure-chart" height="220"></canvas>
+        </div>
+      </div>
+    </section>
 
     <div class="footer">
       <div>● System Status: <span class="green" id="system-status">Waiting for sensor</span></div>
@@ -597,5 +638,8 @@
     setInterval(updateData, 1000);
     updateData();
   </script>
+
+  <script src="script.js"></script>
+  
 </body>
 </html>
