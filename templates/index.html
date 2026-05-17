@@ -451,8 +451,14 @@
 
     <div class="thermal-tooltip" id="thermal-tooltip">
       <div class="tooltip-room" id="tooltip-room">Room</div>
-      <div class="tooltip-value" id="tooltip-value">-- °C</div>
-      <div class="tooltip-light" id="tooltip-light">-- lx</div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Temp</span>
+        <span class="tooltip-value" id="tooltip-value">-- °C</span>
+      </div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Light</span>
+        <span class="tooltip-light" id="tooltip-light">-- lx</span>
+      </div>
     </div>
 
     
@@ -607,6 +613,7 @@
         const tempValue = typeof entry === "number"
           ? entry
           : Number(entry?.value ?? room.getAttribute("data-heat"));
+        const lightValue = entry?.light ?? room.getAttribute("data-light");
         const origin = entry?.origin ?? getDefaultOrigin(room);
         const angle = entry?.angle ?? getDefaultAngle(room);
         const colorRamp = entry?.colors ?? [
@@ -616,6 +623,10 @@
           heatmapConfig.colors.hot
         ];
         const color = heatToColor(tempValue);
+        room.setAttribute("data-heat", tempValue);
+        if (lightValue !== null && lightValue !== undefined) {
+          room.setAttribute("data-light", lightValue);
+        }
         room.style.setProperty("--heat-origin", origin);
         room.style.setProperty("--heat-angle", `${angle}deg`); // Not used atp
         room.style.setProperty("--heat-stops", buildHeatStops(colorRamp));

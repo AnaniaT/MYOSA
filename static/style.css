@@ -112,6 +112,18 @@
   margin-bottom: 6px;
 }
 
+.thermal-tooltip .tooltip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.thermal-tooltip .tooltip-label {
+  color: #9fb8d6;
+  letter-spacing: 1.2px;
+}
+
 .thermal-tooltip .tooltip-value {
   font-family: Consolas, "Courier New", monospace;
   font-size: 16px;
@@ -120,7 +132,6 @@
 }
 
 .thermal-tooltip .tooltip-light {
-  margin-top: 6px;
   font-family: Consolas, "Courier New", monospace;
   font-size: 14px;
   font-weight: 800;

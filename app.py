@@ -1,23 +1,37 @@
 from flask import Flask, jsonify, render_template_string, render_template
+import os
 import serial
 import json
 import threading
 import time
-from google import genai
+from dotenv import load_dotenv
+import google.generativeai as genai
+
+load_dotenv()
 
 app = Flask(__name__)
-client = genai.Client()
+genai.configure(api_key=os.getenv("API_KEY"))
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 SERIAL_PORT = "COM4" 
 BAUD_RATE = 9600
 
 latest_data = {
-    "temperature": None,
-    "pressure_hpa": None,
-    "pressure_pa": None,
+    "temperature": 21,
+    "pressure_hpa": 1003.35,
+    "pressure_pa": 1000335,
     "humidity": None,
     "acceleration": None,
     "last_updated": None
+}
+
+heatmap_rooms = {
+    "living": {"value": 22, "light": 380, "origin": "0% 0%", "angle": 0},
+    "kitchen": {"value": 26, "light": 420, "origin": "70% 85%", "angle": 0},
+    "bedroom 2": {"value": 24, "light": 210, "origin": "20% 60%", "angle": 0},
+    "bath": {"value": 20, "light": 180, "origin": "45% 30%", "angle": 0},
+    "bedroom 1": {"value": 24, "light": 260, "origin": "55% 65%", "angle": 0},
+    "hall": {"value": 23, "light": 140, "origin": "50% -100%", "angle": 0}
 }
 
 def read_arduino():
@@ -58,7 +72,7 @@ c
 
 @app.route("/")
 def index():
-    return render_template_string(HTML)
+    return render_template("index.html")
 
 @app.route("/temperature")
 def temperature_page():
@@ -67,6 +81,10 @@ def temperature_page():
 @app.route("/data")
 def data():
     return jsonify(latest_data)
+
+@app.route("/heatmap")
+def heatmap():
+    return jsonify({"rooms": heatmap_rooms})
 
 @app.route("/temperature/fever-test")
 def fever_test_page():
@@ -87,9 +105,8 @@ def analyze_fever():
         return jsonify({"error": "No average temperature received"}), 400
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=f"""
+        response = model.generate_content(
+            f"""
             Average measured temperature: {avg_temp} °C.
 
             Decide whether this may indicate fever.
