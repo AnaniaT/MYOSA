@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MAKEBots Sensor Dashboard</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Arial", sans-serif;
+    background: radial-gradient(circle at top right, #10213a, #020711 55%);
+    color: #eef5ff;
+    overflow-x: hidden;
+  }
+
+  header {
+    height: 84px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.14);
+    background: rgba(2, 7, 17, 0.88);
+    backdrop-filter: blur(14px);
+  }
+
+  .brand {
+    font-size: 29px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    min-width: 190px;
+  }
+
+  nav {
+    display: flex;
+    gap: 42px;
+    margin-right: auto;
+    margin-left: 42px;
+    color: #e5edff;
+    font-size: 18px;
+  }
+
+  nav span {
+    position: relative;
+    cursor: pointer;
+    padding: 31px 0;
+  }
+
+  nav .active {
+    color: #4da0ff;
+    font-weight: 700;
+  }
+
+  nav .active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 4px;
+    background: #4da0ff;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .profile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 18px;
+  }
+
+  .avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #5b6b80, #1d2838);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+  }
+
+  main {
+    padding: 42px 40px 30px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(44px, 5vw, 76px);
+    letter-spacing: 4px;
+    font-weight: 950;
+    line-height: 0.95;
+    text-shadow: 0 4px 18px rgba(0,0,0,0.45);
+  }
+
+  .subtitle {
+    color: #9bb8d9;
+    font-size: 20px;
+    line-height: 1.55;
+    max-width: 720px;
+    margin-top: 20px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+    margin-top: 36px;
+  }
+
+  .card {
+    height: 500px;
+    padding: 28px 24px 24px;
+    border-radius: 15px;
+    background: linear-gradient(145deg, rgba(10, 22, 39, 0.98), rgba(4, 12, 24, 0.98));
+    border: 1px solid color-mix(in srgb, var(--accent) 65%, transparent);
+    box-shadow: 0 24px 55px rgba(0,0,0,0.38);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 5px;
+    background: var(--accent);
+    box-shadow: 0 0 18px var(--accent);
+  }
+
+  .icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 15px;
+    background: rgba(255,255,255,0.065);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+
+  .status {
+    position: absolute;
+    right: 22px;
+    top: 44px;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    font-weight: 900;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .status::before {
+    content: "";
+    width: 11px;
+    height: 11px;
+    display: inline-block;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 8px;
+    box-shadow: 0 0 14px var(--accent);
+    vertical-align: -1px;
+  }
+
+  .standby {
+    color: #5c779e;
+  }
+
+  .standby::before {
+    background: #5c779e;
+    box-shadow: none;
+  }
+
+  .sensor-title {
+    font-size: clamp(20px, 1.6vw, 27px);
+    font-weight: 950;
+    letter-spacing: -0.8px;
+    margin-top: 0;
+    line-height: 1.05;
+    white-space: nowrap;
+  }
+
+  .sensor-code {
+    color: #7fa2cc;
+    letter-spacing: 3.5px;
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .value {
+    font-size: clamp(28px, 2.5vw, 42px);
+    font-weight: 900;
+    margin: 22px 0 20px;
+    color: var(--accent);
+    font-family: Consolas, "Courier New", monospace;
+    line-height: 1.05;
+    white-space: normal;
+  }
+
+  .specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .spec {
+    background: rgba(39, 67, 105, 0.38);
+    padding: 13px 14px;
+    border-radius: 10px;
+    min-height: 92px;
+  }
+
+  .spec-label {
+    font-size: 12px;
+    letter-spacing: 2px;
+    font-weight: 950;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .spec-value {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 16px;
+    line-height: 1.35;
+    color: #ffffff;
+  }
+
+  .desc {
+    color: #9fb8d6;
+    line-height: 1.4;
+    font-size: 15px;
+    max-width: 100%;
+  }
+
+  .footer {
+    margin-top: 24px;
+    padding: 18px 24px;
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 13px;
+    background: rgba(7, 16, 30, 0.76);
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    color: #9fb8d6;
+    font-size: 15px;
+  }
+
+  .green {
+    color: #22e6a7;
+  }
+
+  .clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .clickable:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 30px 70px rgba(0,0,0,0.55);
+  }
+
+  @media (max-width: 1050px) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(280px, 1fr));
+    }
+
+    .card {
+      height: auto;
+      min-height: 500px;
+    }
+  }
+
+  @media (max-width: 760px) {
+    header {
+      padding: 0 20px;
+    }
+
+    nav {
+      display: none;
+    }
+
+    main {
+      padding: 34px 20px 24px;
+    }
+
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .footer {
+      flex-direction: column;
+    }
+  }
+</style>
+</head>
+
+<body>
+  <header>
+    <div class="brand">MAKEBots</div>
+
+    <nav>
+      <span class="active">Dashboard</span>
+      <span>Sensors</span>
+      <span>History</span>
+      <span>Settings</span>
+    </nav>
+
+    <div class="profile">
+      <div class="avatar">U</div>
+      <span>User</span>
+      <span>⌄</span>
+    </div>
+  </header>
+
+  <main>
+    <h1>SELECT A SENSOR</h1>
+    <div class="subtitle">
+      Choose a sensor to explore its compatible driver libraries,
+      calibration tools, and processing modules.
+    </div>
+
+    <section class="grid">
+
+      <div class="card clickable" onclick="window.location.href='/temperature'" style="--accent:#ff8b3d;">
+        <div class="status" id="temp-status">STANDBY</div>
+        <div class="icon">♨</div>
+        <div class="sensor-title">TEMPERATURE</div>
+        <div class="sensor-code">BMP-180</div>
+        <div class="value"><span id="temperature">--</span> °C</div>
+
+        <div class="specs">
+          <div class="spec">
+            <div class="spec-label">RANGE</div>
+            <div class="spec-value">-40 to<br>+85°C</div>
+          </div>
+          <div class="spec">
+            <div class="spec-label">ACCURACY</div>
+            <div class="spec-value">±1.0°C</div>
+          </div>
+        </div>
+
+        <div class="desc">
+          Temperature data from the BMP180 environmental pressure sensor.
+        </div>
+      </div>
+
+      <div class="card" style="--accent:#4d9dff;">
+        <div class="status" id="pressure-status">STANDBY</div>
+        <div class="icon">⌁</div>
+        <div class="sensor-title">PRESSURE</div>
+        <div class="sensor-code">BMP-180</div>
+        <div class="value"><span id="pressure">--</span><br>hPa</div>
+
+        <div class="specs">
+          <div class="spec">
+            <div class="spec-label">RANGE</div>
+            <div class="spec-value">300 - 1100<br>hPa</div>
+          </div>
+          <div class="spec">
+            <div class="spec-label">RAW</div>
+            <div class="spec-value"><span id="pressure-pa">--</span><br>Pa</div>
+          </div>
+        </div>
+
+        <div class="desc">
+          Barometric pressure reading with integrated temperature compensation.
+        </div>
+      </div>
+
+      <div class="card" style="--accent:#22e6a7;">
+        <div class="status standby" id="humidity-status">STANDBY</div>
+        <div class="icon">♧</div>
+        <div class="sensor-title">HUMIDITY</div>
+        <div class="sensor-code">NOT CONNECTED</div>
+        <div class="value"><span id="humidity">--</span> % RH</div>
+
+        <div class="specs">
+          <div class="spec">
+            <div class="spec-label">RANGE</div>
+            <div class="spec-value">0 - 100%<br>RH</div>
+          </div>
+          <div class="spec">
+            <div class="spec-label">STATUS</div>
+            <div class="spec-value">Waiting</div>
+          </div>
+        </div>
+
+        <div class="desc">
+          This card becomes active when a humidity sensor value is received.
+        </div>
+      </div>
+
+      <div class="card" style="--accent:#a77cff;">
+        <div class="status standby" id="accel-status">STANDBY</div>
+        <div class="icon">⌁</div>
+        <div class="sensor-title">ACCELEROMETER</div>
+        <div class="sensor-code">NOT CONNECTED</div>
+        <div class="value"><span id="acceleration">--</span> g</div>
+
+        <div class="specs">
+          <div class="spec">
+            <div class="spec-label">RANGE</div>
+            <div class="spec-value">±2 / ±4 /<br>±8 g</div>
+          </div>
+          <div class="spec">
+            <div class="spec-label">STATUS</div>
+            <div class="spec-value">Waiting</div>
+          </div>
+        </div>
+
+        <div class="desc">
+          This card becomes active when accelerometer data is received.
+        </div>
+      </div>
+
+    </section>
+
+    <div class="footer">
+      <div>● System Status: <span class="green" id="system-status">Waiting for sensor</span></div>
+      <div>Last Updated: <span id="last-updated">--</span></div>
+      <div class="green">Auto Refresh ON</div>
+    </div>
+  </main>
+
+  <script>
+    function setStatus(id, active) {
+      const el = document.getElementById(id);
+      el.textContent = active ? "ACTIVE" : "STANDBY";
+      el.classList.toggle("standby", !active);
+    }
+
+    function formatValue(value, digits = 2) {
+      if (value === null || value === undefined) return "--";
+      return Number(value).toFixed(digits);
+    }
+
+    async function updateData() {
+      const response = await fetch("/data");
+      const data = await response.json();
+
+      const tempActive = data.temperature !== null;
+      const pressureActive = data.pressure_hpa !== null;
+      const humidityActive = data.humidity !== null;
+      const accelActive = data.acceleration !== null;
+
+      document.getElementById("temperature").textContent = formatValue(data.temperature, 2);
+      document.getElementById("pressure").textContent = formatValue(data.pressure_hpa, 2);
+      document.getElementById("pressure-pa").textContent = data.pressure_pa ?? "--";
+      document.getElementById("humidity").textContent = formatValue(data.humidity, 2);
+      document.getElementById("acceleration").textContent = formatValue(data.acceleration, 2);
+      document.getElementById("last-updated").textContent = data.last_updated ?? "--";
+
+      setStatus("temp-status", tempActive);
+      setStatus("pressure-status", pressureActive);
+      setStatus("humidity-status", humidityActive);
+      setStatus("accel-status", accelActive);
+
+      if (tempActive || pressureActive || humidityActive || accelActive) {
+        document.getElementById("system-status").textContent = "All Connected Sensors Operational";
+      } else {
+        document.getElementById("system-status").textContent = "Waiting for sensor";
+      }
+    }
+
+    setInterval(updateData, 1000);
+    updateData();
+  </script>
+</body>
+</html>
