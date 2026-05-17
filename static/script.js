@@ -1,3 +1,4 @@
+// Chart Section
 const chartTheme = {
 	grid: "rgba(148, 181, 220, 0.14)",
 	text: "#b7cce9",
@@ -166,6 +167,11 @@ function initCharts() {
 	updateChart(window.pressureChart, "pressure");
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+	initCharts();
+});
+
+// Heatmap section
 // On Hover Room Temp
 const tooltip = document.getElementById("thermal-tooltip");
 const tooltipRoom = document.getElementById("tooltip-room");
@@ -218,12 +224,127 @@ function handleRoomLeave() {
     tooltip.classList.remove("visible");
 }
 
+const heatmapConfig = {
+	min: 18,
+	max: 30,
+	colors: {
+	cool: "#22e6a7",
+	stable: "#4d9dff",
+	warm: "#ff8b3d",
+	hot: "#ff4d6d"
+	}
+};
+
+function lerpColor(a, b, t) {
+	const ah = parseInt(a.slice(1), 16);
+	const ar = (ah >> 16) & 0xff;
+	const ag = (ah >> 8) & 0xff;
+	const ab = ah & 0xff;
+	const bh = parseInt(b.slice(1), 16);
+	const br = (bh >> 16) & 0xff;
+	const bg = (bh >> 8) & 0xff;
+	const bb = bh & 0xff;
+	const rr = Math.round(ar + (br - ar) * t);
+	const rg = Math.round(ag + (bg - ag) * t);
+	const rb = Math.round(ab + (bb - ab) * t);
+	return `rgb(${rr}, ${rg}, ${rb})`;
+}
+
+function heatToColor(value) {
+	const { min, max, colors } = heatmapConfig;
+	const clamped = Math.min(Math.max(value, min), max);
+	const normalized = (clamped - min) / (max - min);
+	if (normalized <= 0.33) {
+	return lerpColor(colors.cool, colors.stable, normalized / 0.33);
+	}
+	if (normalized <= 0.66) {
+	return lerpColor(colors.stable, colors.warm, (normalized - 0.33) / 0.33);
+	}
+	return lerpColor(colors.warm, colors.hot, (normalized - 0.66) / 0.34);
+}
+
+function buildHeatStops(colorRamp) {
+	return `${colorRamp[0]} 0%, ${colorRamp[1]} 35%, ${colorRamp[2]} 60%, ${colorRamp[3]} 85%, rgba(0,0,0,0) 100%`;
+}
+
+function getRoomKey(room) {
+	return room.getAttribute("data-room").toLowerCase();
+}
+
+function getDefaultOrigin(room) {
+	return room.getAttribute("data-origin") || "50% 50%";
+}
+
+function getDefaultAngle(room) {
+	return room.getAttribute("data-angle") || "0";
+}
+
+function setHeatmapData(roomData) {
+	const rooms = document.querySelectorAll(".thermal-room");
+	rooms.forEach((room) => {
+	const key = getRoomKey(room);
+	const entry = roomData[key];
+	const tempValue = typeof entry === "number"
+		? entry
+		: Number(entry?.value ?? room.getAttribute("data-heat"));
+	const lightValue = entry?.light ?? room.getAttribute("data-light");
+	const origin = entry?.origin ?? getDefaultOrigin(room);
+	const angle = entry?.angle ?? getDefaultAngle(room);
+	const colorRamp = entry?.colors ?? [
+		heatmapConfig.colors.cool,
+		heatmapConfig.colors.stable,
+		heatmapConfig.colors.warm,
+		heatmapConfig.colors.hot
+	];
+	const color = heatToColor(tempValue);
+	room.setAttribute("data-heat", tempValue);
+	if (lightValue !== null && lightValue !== undefined) {
+		room.setAttribute("data-light", lightValue);
+	}
+	room.style.setProperty("--heat-origin", origin);
+	room.style.setProperty("--heat-angle", `${angle}deg`); // Not used atp
+	room.style.setProperty("--heat-stops", buildHeatStops(colorRamp));
+	room.style.setProperty("--heat-glow", color);
+	});
+
+	const tooltip = document.getElementById("thermal-tooltip");
+	const tooltipRoom = document.getElementById("tooltip-room");
+	console.log(12);
+	if (tooltip && tooltip.classList.contains("visible") && tooltipRoom) {
+	console.log(32);
+	const activeName = tooltipRoom.textContent?.trim().toLowerCase();
+	const activeRoom = Array.from(rooms).find(
+		(room) => room.getAttribute("data-room")?.toLowerCase() === activeName
+	);
+	if (activeRoom) {
+		console.log(45);
+		tooltipValue.textContent = getRoomTemperature(activeRoom);
+		tooltipLight.textContent = getRoomLight(activeRoom);
+	}
+	}
+	
+}
+
+async function refreshHeatmap() {
+	try {
+	const response = await fetch("/heatmap");
+	if (!response.ok) return;
+	const data = await response.json();
+	if (data && data.rooms) {
+		setHeatmapData(data.rooms);
+	}
+	} catch (error) {
+	return;
+	}
+}
+
+window.setHeatmapData = setHeatmapData;
+setHeatmapData({});
+setInterval(refreshHeatmap, 3000);
+
 document.querySelectorAll(".thermal-room").forEach((room) => {
     room.addEventListener("mouseenter", handleRoomEnter);
     room.addEventListener("mousemove", handleRoomMove);
     room.addEventListener("mouseleave", handleRoomLeave);
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-	initCharts();
-});

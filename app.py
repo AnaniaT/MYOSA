@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template_string, render_template
+from flask import Flask, jsonify, request, render_template
 import os
 import serial
 import json
@@ -86,6 +86,24 @@ def data():
 def heatmap():
     return jsonify({"rooms": heatmap_rooms})
 
+@app.route("/heatmap", methods=["POST"])
+def update_heatmap():
+    payload = request.get_json(silent=True) or {}
+    if not payload:
+        return jsonify({"error": "No fields provided to update"}), 400
+
+    for room_key in heatmap_rooms.keys():
+        if room_key not in payload.keys():
+            continue
+        
+        for room_data_type in heatmap_rooms[room_key].keys():
+            if room_data_type not in payload[room_key]:
+                continue
+            
+            heatmap_rooms[room_key][room_data_type] = payload[room_key][room_data_type]
+    
+    return "Success"
+
 @app.route("/temperature/fever-test")
 def fever_test_page():
     return render_template("fever_test.html")
@@ -125,5 +143,5 @@ def analyze_fever():
     
 if __name__ == "__main__":
     threading.Thread(target=read_arduino, daemon=True).start()
-    app.run(debug=False)
+    app.run(host="0.0.0.0", port=5005)
 
