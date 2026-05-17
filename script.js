@@ -166,6 +166,56 @@ function initCharts() {
 	updateChart(window.pressureChart, "pressure");
 }
 
+// On Hover Room Temp
+const tooltip = document.getElementById("thermal-tooltip");
+const tooltipRoom = document.getElementById("tooltip-room");
+const tooltipValue = document.getElementById("tooltip-value");
+
+function getRoomTemperature(room) {
+    const value = room.getAttribute("data-heat");
+    return value ? `${value} °C` : "-- °C";
+}
+
+function positionTooltip(event) {
+    const offset = 16;
+    const tooltipRect = tooltip.getBoundingClientRect();
+    let x = event.clientX + offset;
+    let y = event.clientY + offset;
+
+    if (x + tooltipRect.width > window.innerWidth - 12) {
+    x = event.clientX - tooltipRect.width - offset;
+    }
+    if (y + tooltipRect.height > window.innerHeight - 12) {
+    y = event.clientY - tooltipRect.height - offset;
+    }
+
+    tooltip.style.left = `${Math.max(12, x)}px`;
+    tooltip.style.top = `${Math.max(12, y)}px`;
+}
+
+function handleRoomEnter(event) {
+    const room = event.currentTarget;
+    tooltipRoom.textContent = room.getAttribute("data-room") || "Room";
+    tooltipValue.textContent = getRoomTemperature(room);
+    tooltip.classList.add("visible");
+    positionTooltip(event);
+}
+
+function handleRoomMove(event) {
+    tooltipValue.textContent = getRoomTemperature(event.currentTarget);
+    positionTooltip(event);
+}
+
+function handleRoomLeave() {
+    tooltip.classList.remove("visible");
+}
+
+document.querySelectorAll(".thermal-room").forEach((room) => {
+    room.addEventListener("mouseenter", handleRoomEnter);
+    room.addEventListener("mousemove", handleRoomMove);
+    room.addEventListener("mouseleave", handleRoomLeave);
+});
+
 document.addEventListener("DOMContentLoaded", () => {
 	initCharts();
 });

@@ -68,7 +68,7 @@
 .thermal-overlay {
   position: absolute;
   inset: 0;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .thermal-room {
@@ -79,6 +79,44 @@
   opacity: 0.85;
   mix-blend-mode: screen;
   overflow: hidden;
+  cursor: crosshair;
+}
+
+.thermal-tooltip {
+  position: fixed;
+  z-index: 20;
+  min-width: 140px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(7, 16, 30, 0.94);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.45);
+  color: #e7f1ff;
+  font-size: 12px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.thermal-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.thermal-tooltip .tooltip-room {
+  font-weight: 800;
+  color: #9fb8d6;
+  margin-bottom: 6px;
+}
+
+.thermal-tooltip .tooltip-value {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 16px;
+  font-weight: 900;
+  color: #22e6a7;
 }
 
 .thermal-room::before {
