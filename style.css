@@ -119,6 +119,14 @@
   color: #22e6a7;
 }
 
+.thermal-tooltip .tooltip-light {
+  margin-top: 6px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: #4d9dff;
+}
+
 .thermal-room::before {
   content: "";
   position: absolute;

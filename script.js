@@ -170,10 +170,16 @@ function initCharts() {
 const tooltip = document.getElementById("thermal-tooltip");
 const tooltipRoom = document.getElementById("tooltip-room");
 const tooltipValue = document.getElementById("tooltip-value");
+const tooltipLight = document.getElementById("tooltip-light");
 
 function getRoomTemperature(room) {
     const value = room.getAttribute("data-heat");
     return value ? `${value} °C` : "-- °C";
+}
+
+function getRoomLight(room) {
+	const value = room.getAttribute("data-light");
+	return value ? `${value} lx` : "-- lx";
 }
 
 function positionTooltip(event) {
@@ -197,12 +203,14 @@ function handleRoomEnter(event) {
     const room = event.currentTarget;
     tooltipRoom.textContent = room.getAttribute("data-room") || "Room";
     tooltipValue.textContent = getRoomTemperature(room);
+	tooltipLight.textContent = getRoomLight(room);
     tooltip.classList.add("visible");
     positionTooltip(event);
 }
 
 function handleRoomMove(event) {
-    tooltipValue.textContent = getRoomTemperature(event.currentTarget);
+	tooltipValue.textContent = getRoomTemperature(event.currentTarget);
+	tooltipLight.textContent = getRoomLight(event.currentTarget);
     positionTooltip(event);
 }
 
