@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accelerometer / Gyroscope Monitor</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Arial", sans-serif;
+      background: radial-gradient(circle at top right, #10213a, #020711 55%);
+      color: #eef5ff;
+    }
+
+    header {
+      height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.14);
+      background: rgba(2, 7, 17, 0.88);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      font-size: 29px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .back-link {
+      color: #b7cce9;
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .back-link:hover { color: #e7f1ff; }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 36px 32px 28px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(34px, 4vw, 56px);
+      letter-spacing: 2px;
+      font-weight: 900;
+      line-height: 0.98;
+    }
+
+    .subtitle {
+      color: #9bb8d9;
+      margin-top: 10px;
+      max-width: 760px;
+      line-height: 1.45;
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      border-radius: 15px;
+      padding: 22px;
+      background: linear-gradient(145deg, rgba(10, 22, 39, 0.98), rgba(4, 12, 24, 0.98));
+      border: 1px solid rgba(167, 124, 255, 0.4);
+      box-shadow: 0 24px 55px rgba(0,0,0,0.38);
+    }
+
+    .card-title {
+      margin: 0 0 14px;
+      font-size: 19px;
+      letter-spacing: 1.2px;
+      color: #d4bcff;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: #9fb8d6;
+    }
+
+    .status::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 14px currentColor;
+    }
+
+    .status.locked { color: #ff4d6d; }
+    .status.unlocked { color: #22e6a7; }
+    .status.standby { color: #5c779e; }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 800;
+      color: #06111f;
+      background: #f4f8ff;
+    }
+
+    button.secondary {
+      color: #e7f1ff;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .field {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(39, 67, 105, 0.34);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .label {
+      color: #9fb8d6;
+      font-size: 12px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    .value {
+      margin-top: 8px;
+      font-family: Consolas, "Courier New", monospace;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin-top: 10px;
+      accent-color: #a77cff;
+    }
+
+    .alerts {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .alerts li {
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: rgba(39, 67, 105, 0.24);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 14px;
+      line-height: 1.35;
+      color: #e7f1ff;
+    }
+
+    @media (max-width: 900px) {
+      header {
+        padding: 0 20px;
+      }
+
+      main {
+        padding: 26px 20px 22px;
+      }
+
+      .panel-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">MAKEBots</div>
+    <a class="back-link" href="/">BACK TO DASHBOARD</a>
+  </header>
+
+  <main>
+    <h1 class="title">ACCELEROMETER / GYROSCOPE</h1>
+    <div class="subtitle">Use lock mode to arm intrusion detection. Alerts are generated when MPU6050 motion score crosses the threshold while locked.</div>
+
+    <section class="panel-grid">
+      <article class="card">
+        <h2 class="card-title">Home Detection Lock</h2>
+        <div id="lock-status" class="status standby">Waiting for sensor</div>
+
+        <div class="btn-row">
+          <button type="button" onclick="setMode('lock')">Lock House</button>
+          <button type="button" class="secondary" onclick="setMode('unlock')">Unlock House</button>
+        </div>
+
+        <div class="field">
+          <div class="label">Motion Threshold</div>
+          <input id="threshold-slider" type="range" min="0.05" max="3.00" step="0.01" value="0.65" />
+          <div class="value" id="threshold-value">0.65</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Last Alert</div>
+          <div class="value" id="last-alert">No alerts yet.</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Sensor Status</div>
+          <div class="value" id="sensor-state">Checking MPU6050...</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2 class="card-title">Live IMU Readings</h2>
+
+        <div class="field">
+          <div class="label">Acceleration (g)</div>
+          <div class="value" id="accel-vector">Ax -- | Ay -- | Az --</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Gyroscope (deg/s)</div>
+          <div class="value" id="gyro-vector">Gx -- | Gy -- | Gz --</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Motion Score</div>
+          <div class="value" id="motion-score">--</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Intrusion History</div>
+          <ul id="alert-history" class="alerts">
+            <li>No alerts yet.</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    let isUpdatingThreshold = false;
+
+    function safeNum(value, digits) {
+      if (typeof value !== "number") return "--";
+      return Number(value).toFixed(digits);
+    }
+
+    async function setMode(mode) {
+      const endpoint = mode === "lock" ? "/api/lock" : "/api/unlock";
+      await fetch(endpoint, { method: "POST" });
+      refresh();
+    }
+
+    async function updateThreshold(value) {
+      if (isUpdatingThreshold) return;
+      isUpdatingThreshold = true;
+      try {
+        await fetch("/api/threshold", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ threshold: Number(value) })
+        });
+      } finally {
+        isUpdatingThreshold = false;
+      }
+    }
+
+    async function refresh() {
+      const res = await fetch("/api/status");
+      const data = await res.json();
+      const reading = data.latest_reading || {};
+
+      const lockEl = document.getElementById("lock-status");
+      if (!data.sensor_ok) {
+        lockEl.className = "status standby";
+        lockEl.textContent = "Sensor not ready";
+      } else if (data.house_locked) {
+        lockEl.className = "status locked";
+        lockEl.textContent = "House locked";
+      } else {
+        lockEl.className = "status unlocked";
+        lockEl.textContent = "House unlocked";
+      }
+
+      document.getElementById("sensor-state").textContent = data.sensor_ok
+        ? "Sensor connected"
+        : `Sensor error: ${data.sensor_error || "unknown"}`;
+
+      const slider = document.getElementById("threshold-slider");
+      if (!isUpdatingThreshold) {
+        slider.value = Number(data.motion_threshold || 0.65).toFixed(2);
+      }
+      document.getElementById("threshold-value").textContent = Number(data.motion_threshold || 0.65).toFixed(2);
+
+      document.getElementById("accel-vector").textContent = `Ax ${safeNum(reading.ax, 3)} | Ay ${safeNum(reading.ay, 3)} | Az ${safeNum(reading.az, 3)}`;
+      document.getElementById("gyro-vector").textContent = `Gx ${safeNum(reading.gx, 2)} | Gy ${safeNum(reading.gy, 2)} | Gz ${safeNum(reading.gz, 2)}`;
+      document.getElementById("motion-score").textContent = safeNum(reading.score, 3);
+
+      const lastAlert = document.getElementById("last-alert");
+      if (data.last_alert) {
+        lastAlert.textContent = `${data.last_alert.message} (score=${data.last_alert.score})`;
+      } else {
+        lastAlert.textContent = "No alerts yet.";
+      }
+
+      const historyEl = document.getElementById("alert-history");
+      const history = data.alert_history || [];
+      historyEl.innerHTML = "";
+      if (history.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "No alerts yet.";
+        historyEl.appendChild(li);
+      } else {
+        for (const alert of history.slice().reverse()) {
+          const li = document.createElement("li");
+          li.textContent = `${alert.timestamp} | score=${alert.score} | ${alert.message}`;
+          historyEl.appendChild(li);
+        }
+      }
+    }
+
+    const thresholdSlider = document.getElementById("threshold-slider");
+    thresholdSlider.addEventListener("input", (event) => {
+      document.getElementById("threshold-value").textContent = Number(event.target.value).toFixed(2);
+    });
+    thresholdSlider.addEventListener("change", (event) => {
+      updateThreshold(event.target.value);
+    });
+
+    refresh();
+    setInterval(refresh, 500);
+  </script>
+</body>
+</html>

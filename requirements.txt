@@ -32,6 +32,7 @@ pyparsing==3.3.2
 pyserial==3.5
 python-dotenv==1.2.2
 requests==2.34.2
+smbus2==0.4.3
 tqdm==4.67.3
 typing-inspection==0.4.2
 typing_extensions==4.15.0

@@ -401,11 +401,11 @@
         </div>
       </div>
 
-      <div class="card" style="--accent:#a77cff;">
+      <div class="card clickable" onclick="window.location.href='/accelerometer'" style="--accent:#a77cff;">
         <div class="status standby" id="accel-status">STANDBY</div>
         <div class="icon">⌁</div>
-        <div class="sensor-title">ACCELEROMETER</div>
-        <div class="sensor-code">NOT CONNECTED</div>
+        <div class="sensor-title">ACCELEROMETER / GYRO</div>
+        <div class="sensor-code">MPU6050</div>
         <div class="value"><span id="acceleration">--</span> g</div>
 
         <div class="specs">
@@ -414,13 +414,13 @@
             <div class="spec-value">±2 / ±4 /<br>±8 g</div>
           </div>
           <div class="spec">
-            <div class="spec-label">STATUS</div>
-            <div class="spec-value">Waiting</div>
+            <div class="spec-label">GYRO</div>
+            <div class="spec-value"><span id="gyroscope">--</span> deg/s</div>
           </div>
         </div>
 
         <div class="desc">
-          This card becomes active when accelerometer data is received.
+          Live MPU6050 acceleration and gyroscope magnitude. Click to open intrusion controls.
         </div>
       </div>
 
@@ -529,13 +529,14 @@
       const tempActive = data.temperature !== null;
       const pressureActive = data.pressure_hpa !== null;
       const humidityActive = data.humidity !== null;
-      const accelActive = data.acceleration !== null;
+      const accelActive = Boolean(data.door_monitor && data.door_monitor.sensor_ok);
 
       document.getElementById("temperature").textContent = formatValue(data.temperature, 2);
       document.getElementById("pressure").textContent = formatValue(data.pressure_hpa, 2);
       document.getElementById("pressure-pa").textContent = data.pressure_pa ?? "--";
       document.getElementById("humidity").textContent = formatValue(data.humidity, 2);
       document.getElementById("acceleration").textContent = formatValue(data.acceleration, 2);
+      document.getElementById("gyroscope").textContent = formatValue(data.gyroscope, 2);
       document.getElementById("last-updated").textContent = data.last_updated ?? "--";
 
       setStatus("temp-status", tempActive);
