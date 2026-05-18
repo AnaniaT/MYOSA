@@ -32,9 +32,9 @@ ACCEL_XOUT_H = 0x3B
 GYRO_XOUT_H = 0x43
 
 latest_data = {
-    "temperature": None,
-    "pressure_hpa": None,
-    "pressure_pa": None,
+    "temperature": 21,
+    "pressure_hpa": 1003.35,
+    "pressure_pa": 1000335,
     "humidity": None,
     "acceleration": None,
     "last_updated": None
