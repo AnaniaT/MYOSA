@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Indoor Plant Monitoring</title>
+  <style>
+    body { margin:0; font-family:Arial; background:radial-gradient(circle at top right,#10213a,#020711 55%); color:#eef5ff; }
+    header { height:84px; display:flex; align-items:center; justify-content:space-between; padding:0 40px; border-bottom:1px solid rgba(255,255,255,.14); background:rgba(2,7,17,.88); }
+    .brand { font-size:29px; font-weight:800; }
+    main { padding:50px 40px; max-width:1000px; }
+    a { color:#9bb8d9; text-decoration:none; font-size:18px; }
+    h1 { font-size:64px; margin:30px 0 10px; letter-spacing:3px; }
+    .subtitle { color:#9bb8d9; font-size:22px; line-height:1.5; }
+    .panel { margin-top:40px; padding:36px; border-radius:18px; background:linear-gradient(145deg,rgba(10,22,39,.98),rgba(4,12,24,.98)); border:1px solid rgba(34,230,167,.7); box-shadow:0 24px 55px rgba(0,0,0,.38); }
+    .value { font-size:72px; font-family:Consolas,monospace; font-weight:900; color:#22e6a7; margin:25px 0; }
+    .status { font-size:28px; font-weight:900; color:#22e6a7; margin-top:20px; }
+    .result { margin-top:28px; font-size:22px; color:#9bb8d9; line-height:1.5; }
+    button { margin-top:25px; padding:18px 34px; border:0; border-radius:12px; background:#22e6a7; color:#06101f; font-size:20px; font-weight:900; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header><div class="brand">MAKEBots</div><div>User ⌄</div></header>
+
+  <main>
+    <a href="/temperature">← Back to Temperature</a>
+    <h1>INDOOR PLANT MONITORING</h1>
+    <div class="subtitle">Check whether indoor temperature conditions are suitable for common houseplants.</div>
+
+    <div class="panel">
+      <div>LIVE TEMPERATURE</div>
+      <div class="value"><span id="temperature">--</span> °C</div>
+      <div class="status" id="local-status">Waiting for sensor...</div>
+
+      <button onclick="analyze()">Analyze with Gemini</button>
+
+      <div class="result">
+        AI Recommendation:
+        <div id="ai-result" style="margin-top:12px;color:#eef5ff;">Waiting for analysis...</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let currentTemperature = null;
+
+    function formatValue(value) {
+      if (value === null || value === undefined) return "--";
+      return Number(value).toFixed(2);
+    }
+
+    function localIndoorPlantStatus(temp) {
+      if (temp === null || temp === undefined) return "Waiting for sensor...";
+      if (temp < 15) return "Too cold for most indoor plants.";
+      if (temp <= 26) return "Comfortable for most indoor plants.";
+      if (temp <= 30) return "Warm — watch for drying soil.";
+      return "Too hot — move plants away from heat.";
+    }
+
+    async function updateData() {
+      const response = await fetch("/data");
+      const data = await response.json();
+
+      currentTemperature = data.temperature;
+      document.getElementById("temperature").textContent = formatValue(currentTemperature);
+      document.getElementById("local-status").textContent = localIndoorPlantStatus(currentTemperature);
+    }
+
+    async function analyze() {
+      document.getElementById("ai-result").textContent = "Analyzing...";
+
+      const response = await fetch("/analyze-indoor-plants", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          usecase: "indoor_plants",
+          temperature: currentTemperature
+        })
+      });
+
+      const data = await response.json();
+      document.getElementById("ai-result").textContent = data.analysis || data.error || "Analysis failed.";
+    }
+
+    setInterval(updateData, 1000);
+    updateData();
+  </script>
+</body>
+</html>

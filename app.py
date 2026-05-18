@@ -9,6 +9,7 @@ import time
 from dotenv import load_dotenv
 import google.generativeai as genai
 
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -31,9 +32,9 @@ ACCEL_XOUT_H = 0x3B
 GYRO_XOUT_H = 0x43
 
 latest_data = {
-    "temperature": 21,
-    "pressure_hpa": 1003.35,
-    "pressure_pa": 1000335,
+    "temperature": None,
+    "pressure_hpa": None,
+    "pressure_pa": None,
     "humidity": None,
     "acceleration": None,
     "last_updated": None
@@ -287,13 +288,17 @@ def update_heatmap():
     
     return "Success"
 
-@app.route("/temperature/fever-test")
-def fever_test_page():
-    return render_template("fever_test.html")
+@app.route("/temperature/greenhouse-monitoring")
+def greenhouse_monitoring_page():
+    return render_template("greenhouse_monitoring.html")
 
-@app.route("/temperature/plant-monitoring")
-def plant_monitoring_page():
-    return render_template("plant_monitoring.html")
+@app.route("/temperature/indoor-plant-monitoring")
+def indoor_plant_monitoring_page():
+    return render_template("indoor_plant_monitoring.html")
+
+@app.route("/temperature/energy-optimization")
+def energy_optimization_page():
+    return render_template("energy_optimization.html")
 
 
 @app.route("/api/status")
@@ -363,24 +368,30 @@ def api_threshold():
 
     return jsonify(response)
 
-@app.route("/analyze-fever", methods=["POST"])
-def analyze_fever():
-    from flask import request
-
+@app.route("/analyze-greenhouse", methods=["POST"])
+def analyze_greenhouse():
     data = request.get_json()
-    avg_temp = data.get("average_temperature")
+    temperature = data.get("temperature")
 
-    if avg_temp is None:
-        return jsonify({"error": "No average temperature received"}), 400
+    if temperature is None:
+        return jsonify({"error": "No temperature received"}), 400
 
     try:
         response = model.generate_content(
             f"""
-            Average measured temperature: {avg_temp} °C.
+            You are an AI greenhouse assistant.
 
-            Decide whether this may indicate fever.
-            Do not give a medical diagnosis.
-            Keep it short and clear.
+            Current greenhouse temperature: {temperature} °C.
+
+            Explain whether the greenhouse is:
+            - too cold
+            - optimal
+            - warm
+            - too hot
+
+            Suggest one practical greenhouse action.
+
+            Keep the response under 4 sentences.
             """
         )
 
@@ -388,7 +399,74 @@ def analyze_fever():
 
     except Exception as e:
         return jsonify({
-            "error": "Gemini analysis failed.",
+            "error": "Greenhouse AI analysis failed.",
+            "details": str(e)
+        }), 500
+    
+@app.route("/analyze-indoor-plants", methods=["POST"])
+def analyze_indoor_plants():
+    data = request.get_json()
+    temperature = data.get("temperature")
+
+    if temperature is None:
+        return jsonify({"error": "No temperature received"}), 400
+
+    try:
+        response = model.generate_content(
+            f"""
+            You are an AI indoor plant assistant.
+
+            Current indoor temperature: {temperature} °C.
+
+            Explain whether this temperature is suitable
+            for common indoor houseplants.
+
+            Suggest one plant-care recommendation.
+
+            Keep the response under 4 sentences.
+            """
+        )
+
+        return jsonify({"analysis": response.text})
+
+    except Exception as e:
+        return jsonify({
+            "error": "Indoor plant AI analysis failed.",
+            "details": str(e)
+        }), 500
+    
+@app.route("/analyze-energy", methods=["POST"])
+def analyze_energy():
+    data = request.get_json()
+    temperature = data.get("temperature")
+
+    if temperature is None:
+        return jsonify({"error": "No temperature received"}), 400
+
+    try:
+        response = model.generate_content(
+            f"""
+            You are an AI home energy optimization assistant.
+
+            Current room temperature: {temperature} °C.
+
+            Recommend:
+            - cooling
+            - ventilation
+            - heating
+            - no action
+
+            Focus on energy efficiency and comfort.
+
+            Keep the response under 4 sentences.
+            """
+        )
+
+        return jsonify({"analysis": response.text})
+
+    except Exception as e:
+        return jsonify({
+            "error": "Energy optimization AI failed.",
             "details": str(e)
         }), 500
     

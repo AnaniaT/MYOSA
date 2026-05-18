@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MAKEBots Temperature Sensor</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top right, #10213a, #020711 55%);
+      color: #eef5ff;
+    }
+
+    header {
+      height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.14);
+      background: rgba(2, 7, 17, 0.88);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      font-size: 29px;
+      font-weight: 800;
+    }
+
+    nav {
+      display: flex;
+      gap: 42px;
+      color: #e5edff;
+      font-size: 18px;
+    }
+
+    nav span {
+      cursor: pointer;
+    }
+
+    nav .active {
+      color: #ff8b3d;
+      font-weight: 800;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 18px;
+    }
+
+    .avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #5b6b80, #1d2838);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+    }
+
+    main {
+      padding: 42px 40px;
+    }
+
+    .back {
+      color: #9bb8d9;
+      text-decoration: none;
+      font-size: 18px;
+      display: inline-block;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(44px, 5vw, 72px);
+      letter-spacing: 4px;
+      font-weight: 950;
+      line-height: 0.95;
+    }
+
+    .subtitle {
+      color: #9bb8d9;
+      font-size: 20px;
+      line-height: 1.55;
+      max-width: 780px;
+      margin-top: 20px;
+    }
+
+    .live-panel {
+      margin-top: 34px;
+      padding: 28px 34px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, rgba(10, 22, 39, 0.98), rgba(4, 12, 24, 0.98));
+      border: 1px solid rgba(255, 139, 61, 0.65);
+      box-shadow: 0 24px 55px rgba(0,0,0,0.38);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 900px;
+    }
+
+    .live-label {
+      color: #9bb8d9;
+      font-size: 18px;
+      letter-spacing: 3px;
+      font-weight: 800;
+    }
+
+    .live-value {
+      color: #ff8b3d;
+      font-size: 56px;
+      font-family: Consolas, monospace;
+      font-weight: 900;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(240px, 1fr));
+      gap: 26px;
+      margin-top: 42px;
+    }
+
+    .option-card {
+      min-height: 260px;
+      padding: 28px;
+      border-radius: 16px;
+      background: rgba(9, 20, 36, 0.9);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.32);
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .option-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 5px;
+      background: #ff8b3d;
+    }
+
+    .option-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(255, 139, 61, 0.8);
+    }
+
+    .option-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 16px;
+      background: rgba(255, 139, 61, 0.1);
+      color: #ff8b3d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      margin-bottom: 26px;
+    }
+
+    .option-title {
+      font-size: 25px;
+      font-weight: 900;
+      margin-bottom: 14px;
+    }
+
+    .option-desc {
+      color: #9fb8d6;
+      line-height: 1.5;
+      font-size: 18px;
+    }
+
+    .coming-soon {
+      margin-top: 22px;
+      color: #ff8b3d;
+      font-weight: 800;
+      letter-spacing: 2px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      nav {
+        display: none;
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      .live-panel {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand">MAKEBots</div>
+
+    <nav>
+      <span onclick="window.location.href='/'">Dashboard</span>
+      <span class="active">Temperature</span>
+      <span>History</span>
+      <span>Settings</span>
+    </nav>
+
+    <div class="profile">
+      <div class="avatar">U</div>
+      <span>User</span>
+      <span>⌄</span>
+    </div>
+  </header>
+
+  <main>
+    <a class="back" href="/">← Back to Dashboard</a>
+
+    <h1>TEMPERATURE SENSOR</h1>
+
+    <div class="subtitle">
+      Choose what you want to do with the BMP180 temperature readings.
+      Functionality can be connected later.
+    </div>
+
+    <div class="live-panel">
+      <div>
+        <div class="live-label">LIVE TEMPERATURE</div>
+        <div class="subtitle">Current real-time value from the connected sensor.</div>
+      </div>
+
+      <div class="live-value">
+        <span id="temperature">--</span> °C
+      </div>
+    </div>
+
+    <section class="options">
+      <div class="option-card" onclick="window.location.href='/temperature/greenhouse-monitoring'">
+  <div class="option-icon">📈</div>
+  <div class="option-title">Greenhouse Monitoring</div>
+  <div class="option-desc">
+    Monitor and maintain optimal temperature conditions for your greenhouse.
+  </div>
+  <div class="coming-soon">v1.0.0</div>
+</div>
+
+      <div class="option-card" onclick="window.location.href='/temperature/indoor-plant-monitoring'">
+        <div class="option-icon">⚙</div>
+        <div class="option-title">Indoor Plant Monitoring</div>
+        <div class="option-desc">
+            Monitor and maintain optimal temperature conditions for your plants.
+        </div>
+        <div class="coming-soon">V1.0.0</div>
+      </div>
+
+      <div class="option-card" onclick="window.location.href='/temperature/energy-optimisation'">
+        <div class="option-icon">⚙</div>
+        <div class="option-title">Energy Optimisation</div>
+        <div class="option-desc">
+            Optimize energy consumption based on temperature readings.
+        </div>
+        <div class="coming-soon">V1.0.0</div>
+      </div>
+
+      <div class="option-card">
+        <div class="option-icon">💾</div>
+        <div class="option-title">Data Logging</div>
+        <div class="option-desc">
+          Save temperature readings for later analysis and reports.
+        </div>
+        <div class="coming-soon">COMING SOON</div>
+      </div>
+
+      <div class="option-card">
+        <div class="option-icon">🧪</div>
+        <div class="option-title">Experiment Mode</div>
+        <div class="option-desc">
+          Run guided experiments using live temperature measurements.
+        </div>
+        <div class="coming-soon">COMING SOON</div>
+      </div>
+
+      <div class="option-card">
+        <div class="option-icon">📤</div>
+        <div class="option-title">Export</div>
+        <div class="option-desc">
+          Export readings as CSV, JSON, or project reports.
+        </div>
+        <div class="coming-soon">COMING SOON</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function formatValue(value, digits = 2) {
+      if (value === null || value === undefined) return "--";
+      return Number(value).toFixed(digits);
+    }
+
+    async function updateData() {
+      const response = await fetch("/data");
+      const data = await response.json();
+
+      document.getElementById("temperature").textContent =
+        formatValue(data.temperature, 2);
+    }
+
+    setInterval(updateData, 1000);
+    updateData();
+  </script>
+</body>
+</html>
